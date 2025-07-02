@@ -1,0 +1,30 @@
+import mediapipe as mp
+import cv2
+
+class GestureRecognizer:
+    def __init__(self):
+        self.hands = mp.solutions.hands.Hands(
+            static_image_mode=False,
+            max_num_hands=2,
+            min_detection_confidence=0.7
+        )
+        self.gestures = {
+            0: 'STOP',
+            1: 'FOLLOW',
+            2: 'LAND'
+        }
+
+    async def recognize(self, frame):
+        """Recognize hand gestures in frame"""
+        results = self.hands.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        
+        if not results.multi_hand_landmarks:
+            return None
+            
+        # Simplified gesture recognition
+        landmarks = results.multi_hand_landmarks[0].landmark
+        if landmarks[8].y < landmarks[6].y:
+            return self.gestures[0]  # STOP
+        elif landmarks[12].y < landmarks[10].y:
+            return self.gestures[1]  # FOLLOW
+        return None

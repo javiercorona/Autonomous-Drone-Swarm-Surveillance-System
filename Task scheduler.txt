@@ -1,0 +1,17 @@
+from typing import Dict, List
+from models.mission import Mission
+from models.drone import Drone
+
+class TaskScheduler:
+    def __init__(self):
+        self.task_queue = asyncio.Queue()
+        
+    async def generate_task_plan(self, mission: Mission, drones: List[Drone]):
+        """Generate optimized task allocation"""
+        # Implementation using your scheduling logic
+        pass
+
+    async def reassign_tasks(self, failed_drone_id: str):
+        """Handle drone failures"""
+        # Implementation for fault tolerance
+        pass

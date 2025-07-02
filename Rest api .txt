@@ -1,0 +1,33 @@
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from models.mission import MissionCreate, MissionStatus
+from core.swarm_manager import SwarmManager
+
+router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def get_swarm_manager():
+    return SwarmManager()
+
+@router.post("/missions/", response_model=MissionStatus)
+async def create_mission(
+    mission: MissionCreate,
+    swarm: SwarmManager = Depends(get_swarm_manager),
+    token: str = Depends(oauth2_scheme)
+):
+    """Create new swarm mission"""
+    try:
+        await swarm.execute_mission(mission.dict())
+        return {"status": "Mission started"}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@router.get("/drones/")
+async def get_drone_status(
+    swarm: SwarmManager = Depends(get_swarm_manager)
+):
+    """Get current drone statuses"""
+    return {
+        drone_id: drone.state.dict()
+        for drone_id, drone in swarm.active_drones.items()
+    }

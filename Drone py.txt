@@ -1,0 +1,29 @@
+from pydantic import BaseModel
+from typing import Optional, Dict
+
+class DroneState(BaseModel):
+    position: list[float]
+    velocity: list[float]
+    battery: float
+    status: str
+
+class DroneCapabilities(BaseModel):
+    max_speed: float
+    sensors: Dict[str, bool]
+    payload: Optional[list[str]]
+
+class Drone:
+    def __init__(self, drone_id: str, capabilities: DroneCapabilities):
+        self.id = drone_id
+        self.capabilities = capabilities
+        self.state = DroneState(
+            position=[0, 0, 0],
+            velocity=[0, 0, 0],
+            battery=100,
+            status="idle"
+        )
+        
+    def update_state(self, new_state: dict):
+        """Update drone telemetry"""
+        # Implementation
+        pass

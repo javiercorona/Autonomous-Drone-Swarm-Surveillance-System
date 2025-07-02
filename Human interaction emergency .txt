@@ -1,0 +1,27 @@
+from enum import Enum
+
+class EmergencyState(Enum):
+    NORMAL = 0
+    LOW_BATTERY = 1
+    COLLISION_IMMINENT = 2
+    LOST_COMMS = 3
+
+class EmergencyHandler:
+    def __init__(self, swarm_manager):
+        self.swarm = swarm_manager
+        self.state = EmergencyState.NORMAL
+
+    async def handle_emergency(self, drone_id: str, emergency_type: EmergencyState):
+        """Execute emergency protocols"""
+        self.state = emergency_type
+        
+        if emergency_type == EmergencyState.LOW_BATTERY:
+            await self._handle_low_battery(drone_id)
+        elif emergency_type == EmergencyState.COLLISION_IMMINENT:
+            await self._avoid_collision(drone_id)
+
+    async def _handle_low_battery(self, drone_id: str):
+        """Execute low battery protocol"""
+        drone = self.swarm.active_drones[drone_id]
+        await drone.return_to_base()
+        await self.swarm.scheduler.reassign_tasks(drone_id)

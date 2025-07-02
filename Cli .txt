@@ -1,0 +1,25 @@
+import click
+from core.swarm_manager import SwarmManager
+
+@click.group()
+def cli():
+    """Drone Swarm Command Line Interface"""
+    pass
+
+@cli.command()
+@click.argument('mission_file')
+def start_mission(mission_file):
+    """Start a new swarm mission"""
+    swarm = SwarmManager()
+    asyncio.run(swarm.execute_mission(mission_file))
+    click.echo(f"Mission started from {mission_file}")
+
+@cli.command()
+def list_drones():
+    """List active drones in swarm"""
+    swarm = SwarmManager()
+    for drone_id in swarm.active_drones:
+        click.echo(f"Drone {drone_id} - Active")
+
+if __name__ == '__main__':
+    cli()

@@ -1,0 +1,13 @@
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    SWARM_ID: str = "swarm-001"
+    MAX_DRONES: int = 50
+    NTP_SERVER: str = "pool.ntp.org"
+    DETECTION_CONFIDENCE: float = 0.8
+    EMERGENCY_LANDING_ALT: float = 2.0
+    
+    class Config:
+        env_file = ".env"
+
+settings = Settings()

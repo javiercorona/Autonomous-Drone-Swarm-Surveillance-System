@@ -1,0 +1,39 @@
+from fastapi import WebSocket
+import json
+from core.crypto_utils import encrypt_log_entry, decrypt_log_entry
+
+class DroneWebSocketManager:
+    def __init__(self, swarm_manager):
+        self.swarm_manager = swarm_manager
+        self.connections = {}
+
+    async def connect(self, websocket: WebSocket, drone_id: str):
+        await websocket.accept()
+        self.connections[drone_id] = websocket
+
+    async def receive_data(self, drone_id: str, encrypted_data: dict):
+        """Handle incoming encrypted data from drone"""
+        try:
+            decrypted = decrypt_log_entry(
+                encrypted_data['ciphertext'],
+                self.swarm_manager.swarm_key,
+                encrypted_data['nonce']
+            )
+            data = json.loads(decrypted)
+            
+            if data['type'] == 'telemetry':
+                await self._handle_telemetry(drone_id, data)
+            elif data['type'] == 'detection':
+                await self._handle_detection(drone_id, data)
+                
+        except Exception as e:
+            print(f"Decryption error: {str(e)}")
+
+    async def send_command(self, drone_id: str, command: dict):
+        """Send encrypted command to drone"""
+        if drone_id in self.connections:
+            encrypted = encrypt_log_entry(
+                json.dumps(command).encode(),
+                self.swarm_manager.swarm_key
+            )
+            await self.connections[drone_id].send_json(encrypted)

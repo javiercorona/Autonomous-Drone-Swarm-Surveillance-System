@@ -1,0 +1,41 @@
+import asyncio
+from typing import Dict
+from models.drone import Drone
+from features.swarm_behavior.coordinator import BehaviorCoordinator
+from core.task_scheduler import TaskScheduler
+
+class SwarmManager:
+    def __init__(self):
+        self.active_drones: Dict[str, Drone] = {}
+        self.behavior = BehaviorCoordinator()
+        self.scheduler = TaskScheduler()
+        self.current_formation = None
+
+    async def add_drone(self, drone_id: str, capabilities: dict):
+        """Register a new drone to the swarm"""
+        self.active_drones[drone_id] = Drone(drone_id, capabilities)
+        await self.behavior.update_swarm_topology(self.active_drones)
+
+    async def remove_drone(self, drone_id: str):
+        """Handle drone disconnection"""
+        if drone_id in self.active_drones:
+            await self.scheduler.reassign_tasks(drone_id)
+            del self.active_drones[drone_id]
+            await self.behavior.update_swarm_topology(self.active_drones)
+
+    async def execute_mission(self, mission_config: dict):
+        """Coordinate mission execution across swarm"""
+        tasks = self.scheduler.generate_task_graph(
+            mission_config,
+            list(self.active_drones.values())
+        )
+        
+        await asyncio.gather(*[
+            self._assign_task(drone_id, task)
+            for drone_id, task in tasks.items()
+        ])
+
+    async def _assign_task(self, drone_id: str, task: dict):
+        """Send task to specific drone"""
+        drone = self.active_drones[drone_id]
+        await drone.send_command(task)

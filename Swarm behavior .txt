@@ -1,0 +1,34 @@
+from typing import Dict, List
+from models.drone import Drone
+from .formations import FormationLibrary
+from .collision import CollisionAvoidance
+
+class BehaviorCoordinator:
+    def __init__(self):
+        self.formation_lib = FormationLibrary()
+        self.collision_avoider = CollisionAvoidance()
+        self.current_formation = None
+
+    async def update_swarm_topology(self, drones: Dict[str, Drone]):
+        """Recalculate swarm positions based on formation"""
+        if self.current_formation:
+            positions = self.formation_lib.get_positions(
+                self.current_formation,
+                len(drones)
+            
+            for i, (drone_id, drone) in enumerate(drones.items()):
+                target_pos = positions[i]
+                drone.update_target(target_pos)
+
+    async def avoid_collisions(self, drones: List[Drone]):
+        """Adjust paths to prevent collisions"""
+        positions = {drone.id: drone.position for drone in drones}
+        velocities = {drone.id: drone.velocity for drone in drones}
+        
+        adjustments = self.collision_avoider.calculate_adjustments(
+            positions,
+            velocities)
+        
+        for drone in drones:
+            if drone.id in adjustments:
+                drone.adjust_path(adjustments[drone.id])

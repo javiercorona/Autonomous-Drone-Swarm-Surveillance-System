@@ -1,0 +1,36 @@
+import cv2
+import numpy as np
+from deepface import DeepFace
+
+class FaceDetector:
+    def __init__(self, db_path: str):
+        self.known_faces = self._load_known_faces(db_path)
+        self.model = DeepFace.build_model("Facenet512")
+
+    def _load_known_faces(self, db_path: str):
+        """Load known faces from database"""
+        # Implementation using your existing database code
+        pass
+
+    async def detect_faces(self, frame: np.ndarray):
+        """Process frame and identify faces"""
+        try:
+            results = DeepFace.extract_faces(
+                frame,
+                detector_backend='retinaface',
+                enforce_detection=False
+            )
+            
+            recognitions = []
+            for face in results:
+                if face['confidence'] > 0.95:  # Threshold
+                    identity = await self._recognize_face(face['face'])
+                    recognitions.append({
+                        'box': face['facial_area'],
+                        'identity': identity,
+                        'confidence': face['confidence']
+                    })
+            return recognitions
+        except Exception as e:
+            print(f"Face detection error: {str(e)}")
+            return []

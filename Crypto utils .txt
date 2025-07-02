@@ -1,0 +1,33 @@
+import os
+import time
+from hashlib import blake2b
+from nacl.secret import SecretBox
+from nacl.utils import random
+from nacl.exceptions import CryptoError
+from cryptography.hazmat.primitives import constant_time
+
+class SecureCommunication:
+    def __init__(self):
+        self.swarm_key = self._generate_swarm_key()
+        
+    def _generate_swarm_key(self) -> bytes:
+        """Generate swarm-wide encryption key"""
+        return blake2b(os.urandom(32), digest_size=32).digest()
+
+    def encrypt_data(self, data: bytes) -> dict:
+        """Encrypt data with nonce"""
+        nonce = random(SecretBox.NONCE_SIZE)
+        box = SecretBox(self.swarm_key)
+        ciphertext = box.encrypt(data, nonce).ciphertext
+        return {
+            'ciphertext': ciphertext,
+            'nonce': nonce
+        }
+
+    def decrypt_data(self, ciphertext: bytes, nonce: bytes) -> bytes:
+        """Decrypt data with thorough validation"""
+        box = SecretBox(self.swarm_key)
+        try:
+            return box.decrypt(ciphertext, nonce=nonce)
+        except CryptoError as e:
+            raise ValueError("Decryption failed") from e

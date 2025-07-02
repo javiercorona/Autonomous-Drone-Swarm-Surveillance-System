@@ -1,0 +1,32 @@
+from collections import defaultdict
+import numpy as np
+
+class ObjectTracker:
+    def __init__(self):
+        self.tracked_objects = defaultdict(dict)
+        self.next_id = 0
+
+    async def update_tracks(self, detections: list):
+        """Update object tracks with new detections"""
+        current_ids = []
+        
+        for det in detections:
+            obj_id = self._match_existing(det)
+            if obj_id is None:
+                obj_id = self.next_id
+                self.next_id += 1
+            
+            self.tracked_objects[obj_id] = det
+            current_ids.append(obj_id)
+        
+        # Cleanup stale tracks
+        for obj_id in list(self.tracked_objects.keys()):
+            if obj_id not in current_ids:
+                del self.tracked_objects[obj_id]
+        
+        return self.tracked_objects
+
+    def _match_existing(self, detection: dict) -> int | None:
+        """Match detection to existing track using IoU"""
+        # Implementation of tracking logic
+        pass
