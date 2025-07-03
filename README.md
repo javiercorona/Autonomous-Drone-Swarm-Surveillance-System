@@ -1,6 +1,6 @@
 Autonomous Drone Swarm Surveillance System
 
-![Drone Swarm](https://example.com/drone-swarm-image.jpg) *[Example drone swarm image]*
+![Drone Swarm]() *[]*
 
 ## Overview
 
@@ -73,7 +73,7 @@ The Autonomous Drone Swarm Surveillance System is a cutting-edge AI-powered plat
 
 2. **Installation Steps**
    ```bash
-   git clone https://github.com/yourrepo/drone-swarm-system.git
+   git clone https://github.com/javier-corona/drone-swarm-system.git
    cd drone-swarm-system
    pip install -r requirements.txt
    
@@ -161,7 +161,7 @@ This system includes:
 ## Support
 
 For technical support and licensing information, contact:
-security-solutions@yourcompany.com
+tinyhouseshop@gmail.com
 
 ---
 
